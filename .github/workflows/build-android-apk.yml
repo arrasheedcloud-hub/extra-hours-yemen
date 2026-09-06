@@ -21,14 +21,14 @@ jobs:
         with:
           node-version: 20
 
-      - name: Enable pnpm
+      - name: Enable npm
         run: corepack enable
 
       - name: Install web dependencies
-        run: pnpm install --frozen-lockfile
+        run: npm install 
 
       - name: Build web bundle
-        run: pnpm run build
+        run: npm run build
 
       - name: Set up Java
         uses: actions/setup-java@v4
@@ -38,8 +38,8 @@ jobs:
 
       - name: Generate and sync Android project
         run: |
-          pnpm exec cap add android
-          pnpm exec cap sync android
+          npm exec cap add android
+          npm exec cap sync android
 
       - name: Build APK
         working-directory: android
