@@ -5,50 +5,41 @@ on:
     branches: [main]
   workflow_dispatch:
 
-permissions:
-  contents: read
-
 jobs:
   build-apk:
-    name: Build debug APK
     runs-on: ubuntu-latest
     steps:
-      - name: Check out source
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Node.js
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
 
-      - name: Enable npm
-        run: corepack enable
-
-      - name: Install web dependencies
-        run: npm install 
-
-      - name: Build web bundle
-        run: npm run build
-
-      - name: Set up Java
+      - name: Setup Java JDK
         uses: actions/setup-java@v4
         with:
-          distribution: temurin
-          java-version: '21'
+          distribution: 'temurin'
+          java-version: '17'
 
-      - name: Generate and sync Android project
+      - name: Install dependencies & Build Web
         run: |
-          npm exec cap add android
-          npm exec cap sync android
+          corepack enable
+          npm install
+          npm run build
 
-      - name: Build APK
-        working-directory: android
-        run: ./gradlew assembleDebug
+      - name: Sync Capacitor Android
+        run: npx cap sync android
 
-      - name: Upload APK
+      - name: Build Android APK (Debug)
+        working-directory: ./android
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleDebug
+
+      - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: extra-hours-yemen-debug-apk
+          name: app-debug-apk
           path: android/app/build/outputs/apk/debug/app-debug.apk
-          if-no-files-found: error
-
